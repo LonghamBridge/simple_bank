@@ -10,17 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # - name: Check out code
-    #   uses: actions/checkout@v2
 
-    - name: Checkout repo
+    - name: Checkout code
       uses: actions/checkout@v2
-
-    # - name: Configure AWS credentials
-    #   uses: aws-actions/configure-aws-credentials@v2 # More information on this action can be found below in the 'AWS Credentials' section
-    #   with:
-    #     role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
-    #     aws-region: us-east-1
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -32,6 +24,9 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Load secrets and save to app.env
+      run: aws secretsmanager get-secret-value --secret-id simple_bank --query SecretString --output text | jq -r 'to_entries|map("\(.key)=\(.value)")|.[]' > ap.env
 
     - name: Build, tag, and push docker image to Amazon ECR
       env:
