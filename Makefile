@@ -46,4 +46,7 @@ dockerbuild:
 dockerrun:
 	docker run --name simple_bank --network bank_network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres15:5432/simple_bank?sslmode=disable" simple_bank:latest
 
+# docker login:
+# aws ecr get-login-password | docker login --username AWS --password-stdin 796108002880.dkr.ecr.us-east-1.amazonaws.com
+
 .PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 sqlcinit sqlc test server mock dockerbuild dockerrun
