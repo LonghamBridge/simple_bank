@@ -1,3 +1,5 @@
+DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+
 postgres:
 	docker run --name postgres15 --network bank_network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:15-alpine
 
@@ -11,16 +13,22 @@ execdb:
 	docker exec -it postgres15 psql -U root -d simple_bank
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
+	migrate -path db/migration -database "$(DB_URL)" -verbose up
 
 migrateup1:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+	migrate -path db/migration -database "$(DB_URL)" -verbose up 1
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
+	migrate -path db/migration -database "$(DB_URL)" -verbose down
 
 migratedown1:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
+	migrate -path db/migration -database "$(DB_URL)" -verbose down 1
+
+db_docs:
+	dbdocs build doc/db.dbml
+
+db_schema:
+	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
 
 sqlcinit:
 	docker run --rm -v "F:\simple_bank:/src" -w /src kjconroy/sqlc:1.4.0 init	
@@ -49,4 +57,4 @@ dockerrun:
 # docker login:
 # aws ecr get-login-password | docker login --username AWS --password-stdin 796108002880.dkr.ecr.us-east-1.amazonaws.com
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 sqlcinit sqlc test server mock dockerbuild dockerrun
+.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 db_docs db_schema sqlcinit sqlc test server mock dockerbuild dockerrun 
