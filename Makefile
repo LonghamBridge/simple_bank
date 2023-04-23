@@ -48,13 +48,35 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/longhambridge/simple_bank/db/sqlc Store
 
-dockerbuild:
-	docker build -t simplebank:latest .
+proto:
+	del /f /q "pb\*.go"
+	del /f /q "doc\swagger\*.swagger.json"
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+ 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
+	--openapiv2_out=doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=simple_bank \
+	proto/*.proto
 
-dockerrun:
-	docker run --name simple_bank --network bank_network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres15:5432/simple_bank?sslmode=disable" simple_bank:latest
+# proto:
+# 	rm -f pb/*.go
+# 	rm -f doc/swagger/*.swagger.json
+# 	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+# 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+# 	--grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
+# 	--openapiv2_out=doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=simple_bank \
+# 	proto/*.proto
+# 	statik -src=./doc/swagger -dest=./doc
+
+evans:
+	evans --port 8888 -r repl
+
+# dockerbuild:
+# 	docker build -t simplebank:latest .
+
+# dockerrun:
+# 	docker run --name simple_bank --network bank_network -p 8080:8080 -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@postgres15:5432/simple_bank?sslmode=disable" simple_bank:latest
 
 # docker login:
 # aws ecr get-login-password | docker login --username AWS --password-stdin 796108002880.dkr.ecr.us-east-1.amazonaws.com
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 db_docs db_schema sqlcinit sqlc test server mock dockerbuild dockerrun 
+.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 db_docs db_schema sqlcinit sqlc test server mock proto evan dockerbuild dockerrun 
