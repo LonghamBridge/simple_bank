@@ -4,6 +4,7 @@ package pb;
 
 import "google/api/annotations.proto";
 import "rpc_create_user.proto";
+import "rpc_update_user.proto";
 import "rpc_login_user.proto";
 
 option go_package = "github.com/longhambridge/simple_bank/pb";
@@ -21,4 +22,11 @@ service SimpleBank {
             body: "*"
         };
     }
+    rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {
+        option (google.api.http) = {
+            patch: "/v1/update_user"
+            body: "*"
+        };
+    }
+
 }
